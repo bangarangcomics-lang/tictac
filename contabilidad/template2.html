@@ -1,0 +1,668 @@
+<title>Contabilidad Bangarang</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,440;9..144,520;9..144,600&family=Inter:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  --bg:#F6F1E6;--surface:#FFFFFF;--surface-2:#FBF6EA;--text:#2A241C;--muted:#8A7C64;--border:#E7DCC5;
+  --accent:#BC5B39;--accent-ink:#7C3A21;--accent-soft:#F1DECB;
+  --pos:#4C7A57;--pos-soft:#E4EEE0;--neg:#B23A20;--neg-soft:#F7E2D6;--warn-bg:#FBEFD6;--warn:#8A5B12;
+  --shadow:0 1px 2px rgba(40,30,18,.07);
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#1D1913;--surface:#25201A;--surface-2:#2B251D;--text:#ECE3D0;--muted:#A9987E;--border:#3A3225;
+  --accent:#E2895F;--accent-ink:#F5C9A6;--accent-soft:#402C1B;
+  --pos:#84B78D;--pos-soft:#213228;--neg:#E68A64;--neg-soft:#3C2417;--warn-bg:#392C10;--warn:#E7C173;
+  --shadow:none;color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#1D1913;--surface:#25201A;--surface-2:#2B251D;--text:#ECE3D0;--muted:#A9987E;--border:#3A3225;
+  --accent:#E2895F;--accent-ink:#F5C9A6;--accent-soft:#402C1B;
+  --pos:#84B78D;--pos-soft:#213228;--neg:#E68A64;--neg-soft:#3C2417;--warn-bg:#392C10;--warn:#E7C173;
+  --shadow:none;color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+.serif{font-family:Fraunces,Georgia,serif}
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg);border-bottom:1px solid var(--border)}
+.top-in{max-width:1180px;margin:0 auto;padding:12px 16px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.brand{display:flex;align-items:baseline;gap:9px}
+.brand b{font-family:Fraunces,Georgia,serif;font-weight:600;font-size:19px;letter-spacing:-.01em}
+.brand span.dot{color:var(--accent)}
+.sync{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;color:var(--muted);border:1px solid var(--border);border-radius:99px;padding:2px 9px 2px 7px;white-space:nowrap}
+.sync i{width:6px;height:6px;border-radius:99px;background:var(--muted);flex:none}
+.sync.on i{background:var(--pos)}
+.sync.off i{background:var(--warn)}
+nav.tabs{display:flex;gap:2px;flex-wrap:wrap;flex:1}
+nav.tabs a{padding:7px 13px;border-radius:8px;color:var(--muted);text-decoration:none;font-weight:600;font-size:13.5px}
+nav.tabs a:hover{background:var(--surface-2);color:var(--text)}
+nav.tabs a.on{background:var(--accent-soft);color:var(--accent-ink)}
+main{max-width:1180px;margin:0 auto;padding:20px 16px 60px;padding-block:20px 60px}
+h1{font-family:Fraunces,Georgia,serif;font-weight:600;font-size:25px;margin:4px 0 4px;letter-spacing:-.01em;text-wrap:balance}
+h2{font-family:Fraunces,Georgia,serif;font-weight:600;font-size:17px;margin:0 0 10px}
+h3{font-size:13px;margin:0}
+.sub{color:var(--muted);margin:0 0 16px;max-width:62ch}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;box-shadow:var(--shadow);margin-bottom:16px}
+.grid{display:grid;gap:12px}
+.kpis{grid-template-columns:repeat(auto-fit,minmax(200px,1fr));margin-bottom:16px}
+.kpi{background:var(--surface);border:1px solid var(--border);border-top:2px solid var(--accent);border-radius:10px;padding:13px 15px;box-shadow:var(--shadow)}
+.kpi.alt{border-top-color:var(--pos)}
+.kpi .l{color:var(--muted);font-size:12px}
+.kpi .v{font-family:Fraunces,Georgia,serif;font-size:22px;font-weight:600;letter-spacing:-.01em;margin-top:2px;font-variant-numeric:tabular-nums}
+.kpi .n{color:var(--muted);font-size:12px;margin-top:2px}
+.kpi .n a{color:var(--accent-ink)}
+.bar{display:flex;gap:10px;flex-wrap:wrap;align-items:end;margin-bottom:14px}
+.bar label{display:flex;flex-direction:column;gap:3px;font-size:11.5px;color:var(--muted);flex:1 1 140px}
+.bar .sp{flex:2 1 auto}
+input,select,textarea,button{font:inherit;color:inherit}
+input[type=text],input[type=month],input[type=date],input[type=search],select,textarea{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:7px 9px;min-width:0;width:100%}
+input:focus,select:focus,textarea:focus,button:focus-visible,summary:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+button{cursor:pointer;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:7px 12px;font-weight:600;font-size:13.5px}
+button:hover{background:var(--surface-2)}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+button.primary:hover{filter:brightness(1.06)}
+button.link{border:0;background:none;color:var(--accent-ink);padding:2px 4px;font-weight:600}
+button.link:hover{text-decoration:underline;background:none}
+button.danger{color:var(--neg)}
+.seg{display:inline-flex;border:1px solid var(--border);border-radius:9px;overflow:hidden;background:var(--surface)}
+.seg button{border:0;border-radius:0;background:none;color:var(--muted)}
+.seg button.on{background:var(--accent-soft);color:var(--accent-ink)}
+.tblwrap{overflow-x:auto;border:1px solid var(--border);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+th,td{padding:8px 10px;text-align:left;white-space:nowrap;border-bottom:1px solid var(--border)}
+th{font-size:11.5px;color:var(--muted);font-weight:600;background:var(--surface);position:sticky;top:0;text-transform:uppercase;letter-spacing:.03em}
+td.r,th.r{text-align:right}
+td.wrap{white-space:normal;min-width:180px;color:var(--muted);font-size:13px}
+tr:last-child td{border-bottom:0}
+tfoot td{font-weight:700;background:var(--surface-2)}
+.neg{color:var(--neg)}.pos{color:var(--pos)}.mut{color:var(--muted)}
+.tag{display:inline-block;padding:1px 8px;border-radius:99px;font-size:11.5px;font-weight:600;background:var(--surface-2);color:var(--muted);border:1px solid var(--border)}
+.tag.a{background:var(--neg-soft);color:var(--neg);border-color:transparent}
+.tag.ok{background:var(--pos-soft);color:var(--pos);border-color:transparent}
+.tag.pend{background:var(--accent-soft);color:var(--accent-ink);border-color:transparent}
+.notice{background:var(--warn-bg);color:var(--warn);border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:14px}
+.empty{color:var(--muted);text-align:center;padding:28px 10px}
+.chart{width:100%;height:auto;display:block;min-width:560px}
+.chart .gl{stroke:var(--border);stroke-width:1}.chart .zero{stroke:var(--muted)}
+.chart .ax{fill:var(--muted);font-size:11px}
+[data-chart]{overflow-x:auto}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:8px;font-size:12.5px;color:var(--muted)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+#tip{position:fixed;pointer-events:none;z-index:50;background:var(--text);color:var(--bg);padding:8px 10px;border-radius:8px;font-size:12.5px;display:none;max-width:280px;box-shadow:0 4px 14px rgba(0,0,0,.25)}
+#tip b{display:block;margin-bottom:3px;font-family:Fraunces,Georgia,serif}
+#tip div{display:flex;justify-content:space-between;gap:14px;font-variant-numeric:tabular-nums}
+#tip i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:5px}
+details.dia,details.prov{border:1px solid var(--border);border-radius:10px;background:var(--surface);margin-bottom:8px}
+details.prov{margin:6px 0 0;background:var(--surface-2)}
+details>summary{cursor:pointer;list-style:none;padding:10px 14px;display:flex;gap:12px;align-items:center}
+details>summary::-webkit-details-marker{display:none}
+details>summary::before{content:"▸";color:var(--muted);transition:transform .12s;flex:none}
+details[open]>summary::before{transform:rotate(90deg)}
+summary .d{font-weight:700;min-width:170px}
+summary .n{color:var(--muted);font-size:13px}
+summary .amt{margin-left:auto;font-weight:700;font-variant-numeric:tabular-nums}
+details .inner{padding:0 14px 12px}
+.mes h3{font-size:12.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);display:flex;justify-content:space-between;margin:18px 2px 8px}
+.pivot td:first-child,.pivot th:first-child{position:sticky;left:0;background:var(--surface);z-index:1}
+.pivot tfoot td:first-child{background:var(--surface-2)}
+dialog{border:1px solid var(--border);border-radius:14px;background:var(--surface);color:var(--text);padding:0;width:min(560px,94vw);box-shadow:0 20px 50px rgba(0,0,0,.3)}
+dialog::backdrop{background:rgba(20,14,8,.5)}
+dialog form{padding:18px 20px}
+dialog h2{margin-bottom:14px}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fgrid .full{grid-column:1/-1}
+.fgrid label{display:flex;flex-direction:column;gap:3px;font-size:12.5px;color:var(--muted)}
+.fgrid input,.fgrid select,.fgrid textarea{color:var(--text);width:100%}
+.actions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
+.menu{position:relative}
+.menu summary{display:inline-flex;padding:7px 12px;border:1px solid var(--border);border-radius:8px;font-weight:600;background:var(--surface)}
+.menu summary::before{content:none}
+.menu .pop{position:absolute;right:0;top:calc(100% + 6px);background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:6px;min-width:250px;box-shadow:0 8px 24px rgba(0,0,0,.18);z-index:30;display:flex;flex-direction:column}
+.menu .pop button{border:0;text-align:left;background:none;font-weight:500}
+.menu .pop button:hover{background:var(--surface-2)}
+.menu .pop hr{border:0;border-top:1px solid var(--border);margin:5px 2px}
+.foot{color:var(--muted);font-size:12.5px;margin-top:10px}
+.about{font-size:13px;color:var(--muted);line-height:1.6}
+.about b{color:var(--text)}
+@media (max-width:640px){.fgrid{grid-template-columns:1fr}summary .d{min-width:0}.top-in{padding:9px 12px;gap:8px}main{padding:16px 12px 50px;padding-block:16px 50px}
+nav.tabs{order:3;flex:1 0 100%;flex-wrap:nowrap;overflow-x:auto;padding-bottom:2px}nav.tabs a{white-space:nowrap}.menu{margin-left:auto}.bar select,.bar input{width:100%}}
+</style>
+<header class="top"><div class="top-in">
+  <div class="brand"><b>Bangarang<span class="dot">·</span>Contabilidad</b></div>
+  <span class="sync" id="syncPill"><i></i><span id="syncTxt">Cargando…</span></span>
+  <nav class="tabs" id="tabs"></nav>
+  <details class="menu"><summary>Datos ▾</summary><div class="pop">
+    <button data-act="new">+ Nueva factura o abono</button>
+    <hr>
+    <button data-act="import-xlsx">Actualizar hoja Excel (.xlsx)…</button>
+    <button data-act="import-csv">Importar facturas (CSV / JSON)…</button>
+    <hr>
+    <button data-act="export-csv">Exportar facturas (CSV)</button>
+    <button data-act="export-json">Copia de seguridad (JSON)</button>
+    <hr>
+    <button data-act="about">Cómo funciona esta app</button>
+    <button data-act="reset" class="danger">Restablecer datos iniciales</button>
+  </div></details>
+  <input type="file" id="fileXlsx" accept=".xlsx,.xls" hidden>
+  <input type="file" id="fileCsv" accept=".csv,.json,.txt" hidden>
+</div></header>
+<main id="view"></main>
+<dialog id="dlg"></dialog>
+<div id="tip"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+'use strict';
+const HIST_SEED = /*__HIST__*/[];
+const SEED = /*__SEED__*/[];
+
+/* ---------- utilidades ---------- */
+const MESES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const MES3=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+const GENERAL=new Set(['Nóminas','SS empleados','Autónomos','Gestoría','Trevenque','Alquiler','Alquiler almacén','Datáfono','Sgae','Taxis','Generali','GLS','Seur','Correos','Vistaprint','Iberdrola','Vodafone','Amazon','Google','Ikea','Leroy Merlin/Brico Depot','Feria Valencia','Feria del libro','Salón del comic','Gastos Subvencion','Atrasadas','Otras otras','Todocoleccion','Tecnología','Temporal','MiElectro','Cegal','Gremi','Autores','Niños gratis','Vicente Cuenca','Colect. bruxista','Mincho','Libero','Agora','Drassana']);
+const grupoDe=p=>GENERAL.has(p)?'gen':'dist';
+const PAL=['#BC5B39','#4C7A57','#8B6B3D','#5C7B96','#9C5B8C','#C08A2E','#6E8F5E','#A15353'];
+const GRAY='#8A7C64';
+const eur=new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR'});
+const money=n=>eur.format(Math.round((n||0)*100)/100+0);
+const kfmt=n=>{const a=Math.abs(n);const s=a>=1000?(a/1000).toLocaleString('es-ES',{maximumFractionDigits:a>=10000?0:1})+' k':String(Math.round(a));return (n<0?'−':'')+s};
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const todayISO=()=>iso(new Date());
+const fdate=s=>s?s.slice(8,10)+'/'+s.slice(5,7)+'/'+s.slice(0,4):'—';
+const mlabel=m=>MESES[+m.slice(5,7)-1]+' '+m.slice(0,4);
+const dlabel=s=>{const d=new Date(s+'T00:00:00');return d.toLocaleDateString('es-ES',{day:'numeric',month:'short'})+' · '+d.toLocaleDateString('es-ES',{weekday:'long'})};
+const sum=(a,f)=>a.reduce((t,x)=>t+f(x),0);
+const r2=n=>Math.round(n*100)/100;
+function parseNum(s){s=String(s==null?'':s).trim().replace(/[€\s]/g,'');if(!s)return NaN;if(s.includes(','))s=s.replace(/\./g,'').replace(',','.');return Number(s)}
+function parseDate(s){s=String(s||'').trim();let m;if(!s)return '';if((m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/)))return m[1]+'-'+m[2].padStart(2,'0')+'-'+m[3].padStart(2,'0');if((m=s.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{2,4})$/))){const y=m[3].length===2?'20'+m[3]:m[3];return y+'-'+m[2].padStart(2,'0')+'-'+m[1].padStart(2,'0')}return ''}
+function tryLS(fn){try{return fn()}catch(e){return null}}
+function download(name,text,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+async function offerDownload(name,text,type){
+  if(CAP.downloads){try{await CAP.downloads.save({filename:name,data:text});return}catch(e){if(e&&e.code==='declined')return}}
+  download(name,text,type);
+}
+
+/* ---------- capacidades / almacenamiento ---------- */
+const CAP={db:null,downloads:null};
+const S={facturas:[]};
+let HIST_ACTIVE=HIST_SEED;
+let MODE='local'; // 'local' | 'cloud'
+const LS_FAC='contab.bangarang.facturas.v2', LS_HIST='contab.bangarang.hist.v2', LS_UI='contab.bangarang.ui.v2';
+const UI=Object.assign({tab:'inicio',facMes:'',facProv:'',facTipo:'',facQ:'',gModo:'mensual',gAnio:'',gGrupo:'dist',gProv:'',gImporte:'neto',cMode:'prox',dAnio:'',dProv:''},tryLS(()=>JSON.parse(localStorage.getItem(LS_UI)))||{});
+const OPEN=new Set();
+let CACHE={};let CH={};
+
+function loadLocalFallback(){
+  const f=tryLS(()=>JSON.parse(localStorage.getItem(LS_FAC)));
+  S.facturas=Array.isArray(f)?f:SEED.map(x=>({...x}));
+  const h=tryLS(()=>JSON.parse(localStorage.getItem(LS_HIST)));
+  HIST_ACTIVE=Array.isArray(h)&&h.length?h:HIST_SEED;
+}
+function saveLocal(){CACHE={};tryLS(()=>localStorage.setItem(LS_FAC,JSON.stringify(S.facturas)))}
+function saveLocalHist(){CACHE={};tryLS(()=>localStorage.setItem(LS_HIST,JSON.stringify(HIST_ACTIVE)))}
+function saveUI(){tryLS(()=>localStorage.setItem(LS_UI,JSON.stringify(UI)))}
+function setSync(mode,label){
+  const p=document.getElementById('syncPill');if(!p)return;
+  p.className='sync '+(mode==='cloud'?'on':mode==='error'?'off':'');
+  document.getElementById('syncTxt').textContent=label;
+}
+
+const Store={
+  async init(){
+    loadLocalFallback();render();
+    if(!(window.claude&&window.claude.use)){setSync('local','Guardado en este dispositivo');return}
+    setSync('','Conectando…');
+    try{CAP.db=await window.claude.use('db')}catch(e){CAP.db=null}
+    try{CAP.downloads=await window.claude.use('downloads')}catch(e){CAP.downloads=null}
+    if(!CAP.db){setSync('local','Guardado en este dispositivo');return}
+    MODE='cloud';
+    CAP.db.collection('facturas').onSnapshot(snap=>{
+      S.facturas=snap.empty?SEED.map(x=>({...x})):snap.docs.map(d=>({id:d.id,...d.data()}));
+      CACHE={};setSync('cloud','Sincronizado en la nube');render();
+    },err=>{console.warn('db facturas',err);setSync('error','Sin conexión con la nube')});
+    CAP.db.collection('historico').onSnapshot(snap=>{
+      if(snap.empty){HIST_ACTIVE=HIST_SEED}
+      else{const merged=[];snap.docs.forEach(d=>{const rows=(d.data()||{}).rows;if(Array.isArray(rows))merged.push(...rows)});HIST_ACTIVE=merged.length?merged:HIST_SEED}
+      CACHE={};render();
+    },err=>{console.warn('db historico',err)});
+  },
+  async addFactura(rec){
+    if(MODE==='cloud'){await CAP.db.collection('facturas').add(rec);return}
+    S.facturas.push({id:'u'+Date.now().toString(36)+Math.floor(Math.random()*99),...rec});saveLocal();render();
+  },
+  async setFactura(id,rec){
+    if(MODE==='cloud'){await CAP.db.collection('facturas').doc(id).set(rec);return}
+    const i=S.facturas.findIndex(x=>x.id===id);if(i>=0){S.facturas[i]={id,...rec};saveLocal();render()}
+  },
+  async deleteFactura(id){
+    if(MODE==='cloud'){await CAP.db.collection('facturas').doc(id).delete();return}
+    S.facturas=S.facturas.filter(x=>x.id!==id);saveLocal();render();
+  },
+  async toggleEstado(id){
+    const f=S.facturas.find(x=>x.id===id);if(!f)return;
+    const nuevo=f.estado==='cargada'?'pendiente':'cargada';
+    if(MODE==='cloud'){await CAP.db.collection('facturas').doc(id).update({estado:nuevo});return}
+    f.estado=nuevo;saveLocal();render();
+  },
+  async markDay(d){
+    const ids=S.facturas.filter(f=>f.vto===d).map(f=>f.id);
+    if(MODE==='cloud'){for(const id of ids)await CAP.db.collection('facturas').doc(id).update({estado:'cargada'});return}
+    S.facturas.forEach(f=>{if(f.vto===d)f.estado='cargada'});saveLocal();render();
+  },
+  async importFacturas(recs){
+    const key=f=>[f.prov,f.num,f.fecha,f.total].join('|');
+    const have=new Set(S.facturas.map(key));let n=0;
+    for(const r of recs){if(have.has(key(r)))continue;have.add(key(r));
+      const rec={fecha:r.fecha,prov:r.prov,num:r.num||'',tipo:r.tipo||'factura',base:r.base==null?null:r.base,total:r.total,vto:r.vto||'',pago:r.pago||'Domiciliación',estado:r.estado||'pendiente',nota:r.nota||''};
+      if(MODE==='cloud'){await CAP.db.collection('facturas').add(rec)}else{S.facturas.push({id:'u'+Date.now().toString(36)+n,...rec})}
+      n++}
+    if(MODE!=='cloud'){saveLocal();render()}
+    return n;
+  },
+  async importHistorico(byYear){
+    const years=Object.keys(byYear);
+    if(MODE==='cloud'){for(const y of years)await CAP.db.collection('historico').doc(y).set({rows:byYear[y],actualizado:todayISO()})}
+    else{const merged=[];years.forEach(y=>merged.push(...byYear[y]));
+      const keep=HIST_ACTIVE.filter(r=>!years.includes(r.m.slice(0,4)));
+      HIST_ACTIVE=keep.concat(merged);saveLocalHist();render()}
+    return years.length;
+  },
+  async reset(){
+    if(MODE==='cloud'){const snap=await CAP.db.collection('facturas').get();for(const d of snap.docs)await CAP.db.collection('facturas').doc(d.id).delete();return}
+    tryLS(()=>{localStorage.removeItem(LS_FAC);localStorage.removeItem(LS_HIST)});loadLocalFallback();CACHE={};render();
+  }
+};
+
+/* Serie mensual combinada: para cada proveedor+tipo+mes se usan las facturas registradas
+   en la app si existen; si no, el resumen mensual de la hoja de contabilidad. */
+function series(){
+  if(CACHE.series)return CACHE.series;
+  const reg=new Map();
+  for(const f of S.facturas){const k=f.prov+'|'+(f.tipo==='abono'?'a':'f')+'|'+f.fecha.slice(0,7);reg.set(k,(reg.get(k)||0)+f.total)}
+  const out=[];
+  for(const h of HIST_ACTIVE)if(!reg.has(h.p+'|'+h.t+'|'+h.m))out.push({p:h.p,t:h.t,m:h.m,v:h.v,src:'hist'});
+  for(const [k,v] of reg){const [p,t,m]=k.split('|');out.push({p,t,m,v:r2(v),src:'reg'})}
+  return CACHE.series=out;
+}
+const allYears=()=>[...new Set(series().map(r=>r.m.slice(0,4)))].sort();
+const lastMonth=()=>series().reduce((a,r)=>r.m>a?r.m:a,'');
+function defaultYear(){const t=new Date().getFullYear();const ys=allYears();return String(ys.includes(String(t))?t:ys[ys.length-1])}
+
+/* ---------- gráficos SVG ---------- */
+function niceStep(range,n){const raw=range/n,p=Math.pow(10,Math.floor(Math.log10(raw))),f=raw/p;return(f<=1?1:f<=2?2:f<=5?5:10)*p}
+function buildSeries(rows,cats,catOf,topN){
+  topN=topN||8;const tot=new Map();rows.forEach(r=>tot.set(r.p,(tot.get(r.p)||0)+Math.abs(r.v)));
+  const top=[...tot.entries()].sort((a,b)=>b[1]-a[1]).slice(0,topN).map(e=>e[0]);
+  const idx=new Map(cats.map((c,i)=>[c,i]));
+  const ser=new Map(top.map((p,i)=>[p,{name:p,color:PAL[i%PAL.length],vals:cats.map(()=>0)}]));
+  const other={name:'Otros',color:GRAY,vals:cats.map(()=>0)};
+  for(const r of rows){const i=idx.get(catOf(r));if(i===undefined)continue;(ser.get(r.p)||other).vals[i]+=r.v}
+  const list=[...ser.values()];if(other.vals.some(v=>v))list.push(other);return list;
+}
+function chart(id,ser,cats,labels,height){
+  CH[id]={ser,cats,labels};
+  if(!ser.length||!ser.some(s=>s.vals.some(v=>v)))return '<div class="empty">Sin datos para esta selección.</div>';
+  const W=920,H=height||300,ml=54,mr=8,mt=10,mb=28;
+  const pos=cats.map(()=>0),neg=cats.map(()=>0);
+  ser.forEach(s=>s.vals.forEach((v,i)=>{if(v>0)pos[i]+=v;else neg[i]+=v}));
+  let max=Math.max(0,...pos),min=Math.min(0,...neg);
+  const step=niceStep((max-min)||1,5);max=Math.ceil(max/step)*step;min=Math.floor(min/step)*step;if(max===min)max=min+step;
+  const y=v=>mt+(H-mt-mb)*(1-(v-min)/(max-min));
+  const bw=(W-ml-mr)/cats.length,w=Math.min(bw*.68,54);
+  let g='';
+  for(let v=min;v<=max+step/2;v+=step){const yy=y(v).toFixed(1);g+=`<line x1="${ml}" x2="${W-mr}" y1="${yy}" y2="${yy}" class="gl ${Math.abs(v)<1e-9?'zero':''}"/><text x="${ml-6}" y="${(+yy+4).toFixed(1)}" class="ax" text-anchor="end">${kfmt(v)}</text>`}
+  cats.forEach((c,i)=>{
+    const x=ml+bw*i+(bw-w)/2;let up=0,dn=0;
+    ser.forEach(s=>{const v=s.vals[i];if(!v)return;let a,b;if(v>0){a=up;up+=v;b=up}else{a=dn;dn+=v;b=dn}
+      const t=y(Math.max(a,b)),bt=y(Math.min(a,b));g+=`<rect x="${x.toFixed(1)}" y="${t.toFixed(1)}" width="${w.toFixed(1)}" height="${Math.max(bt-t,.6).toFixed(1)}" fill="${s.color}" rx="1.5"/>`});
+    g+=`<text x="${(ml+bw*i+bw/2).toFixed(1)}" y="${H-9}" class="ax" text-anchor="middle">${esc(labels?labels[i]:c)}</text>`;
+    g+=`<rect class="hit" data-i="${i}" x="${(ml+bw*i).toFixed(1)}" y="${mt}" width="${bw.toFixed(1)}" height="${H-mt-mb}" fill="transparent"/>`;
+  });
+  const legend=ser.map(s=>`<span><i style="background:${s.color}"></i>${esc(s.name)}</span>`).join('');
+  return `<div data-chart="${id}"><svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Gráfico de barras apiladas">${g}</svg><div class="legend">${legend}</div></div>`;
+}
+document.addEventListener('mousemove',e=>{
+  const tip=document.getElementById('tip');const hit=e.target.closest&&e.target.closest('.hit');
+  if(!hit){tip.style.display='none';return}
+  const box=hit.closest('[data-chart]');const c=CH[box.dataset.chart];if(!c){return}
+  const i=+hit.dataset.i;const rows=c.ser.map(s=>({n:s.name,c:s.color,v:s.vals[i]})).filter(r=>r.v).sort((a,b)=>Math.abs(b.v)-Math.abs(a.v));
+  const total=sum(rows,r=>r.v);
+  tip.innerHTML=`<b>${esc(c.labels?c.labels[i]:c.cats[i])}</b>`+rows.slice(0,10).map(r=>`<div><span><i style="background:${r.c}"></i>${esc(r.n)}</span><span>${money(r.v)}</span></div>`).join('')+`<div style="margin-top:4px;border-top:1px solid rgba(128,128,128,.4);padding-top:3px"><b style="margin:0">Total</b><b style="margin:0">${money(total)}</b></div>`;
+  tip.style.display='block';const x=Math.min(e.clientX+14,innerWidth-tip.offsetWidth-8),yy=Math.min(e.clientY+14,innerHeight-tip.offsetHeight-8);tip.style.left=x+'px';tip.style.top=yy+'px';
+});
+
+/* ---------- componentes ---------- */
+const amt=n=>`<span class="${n<0?'neg':''}">${money(n)}</span>`;
+const tagTipo=t=>t==='abono'?'<span class="tag a">Abono</span>':'<span class="tag">Factura</span>';
+const tagEstado=e=>e==='cargada'?'<span class="tag ok">Cargada</span>':'<span class="tag pend">Pendiente</span>';
+const opt=(v,l,cur)=>`<option value="${esc(v)}"${String(cur)===String(v)?' selected':''}>${esc(l)}</option>`;
+const provList=()=>[...new Set([...HIST_ACTIVE.map(h=>h.p),...S.facturas.map(f=>f.prov)])].sort((a,b)=>a.localeCompare(b,'es'));
+function pivotTable(rows,cols,colOf,headLabels,{onProv}={}){
+  const by=new Map();
+  for(const r of rows){const c=colOf(r);if(!cols.includes(c))continue;let e=by.get(r.p);if(!e){e={p:r.p,v:cols.map(()=>0),t:0};by.set(r.p,e)}e.v[cols.indexOf(c)]+=r.v;e.t+=r.v}
+  const list=[...by.values()].filter(e=>Math.abs(e.t)>0.004||e.v.some(v=>Math.abs(v)>0.004)).sort((a,b)=>Math.abs(b.t)-Math.abs(a.t));
+  if(!list.length)return '<div class="empty">Sin datos para esta selección.</div>';
+  const colTot=cols.map((c,i)=>sum(list,e=>e.v[i]));
+  const cell=v=>Math.abs(v)<0.005?'<span class="mut">·</span>':amt(v);
+  return `<div class="tblwrap"><table class="pivot"><thead><tr><th>Proveedor</th>${headLabels.map(h=>`<th class="r">${esc(h)}</th>`).join('')}<th class="r">Total</th></tr></thead><tbody>`+
+   list.map(e=>`<tr><td>${onProv?`<button class="link" data-act="prov" data-p="${esc(e.p)}">${esc(e.p)}</button>`:esc(e.p)}</td>${e.v.map(cell).map(c=>`<td class="r">${c}</td>`).join('')}<td class="r"><b>${amt(e.t)}</b></td></tr>`).join('')+
+   `</tbody><tfoot><tr><td>Total</td>${colTot.map(v=>`<td class="r">${amt(v)}</td>`).join('')}<td class="r">${amt(sum(colTot,v=>v))}</td></tr></tfoot></table></div>`;
+}
+
+/* ---------- vistas ---------- */
+function viewInicio(){
+  const rows=series(),Y=defaultYear(),t=todayISO();
+  const yr=rows.filter(r=>r.m.startsWith(Y));
+  const gasto=sum(yr.filter(r=>grupoDe(r.p)==='dist'),r=>r.v);
+  const abon=sum(yr.filter(r=>r.t==='a'),r=>-r.v);
+  const pend=S.facturas.filter(f=>f.estado!=='cargada');
+  const en30=iso(new Date(Date.now()+30*864e5));
+  const prox=pend.filter(f=>f.vto&&f.vto>=t);
+  const p30=sum(prox.filter(f=>f.vto<=en30),f=>f.total);
+  const sinVto=pend.filter(f=>!f.vto).length;
+  const cats=MESES.map((_,i)=>Y+'-'+String(i+1).padStart(2,'0'));
+  const ser=buildSeries(yr.filter(r=>grupoDe(r.p)==='dist'),cats,r=>r.m,6);
+  const dias=new Map();prox.forEach(f=>dias.set(f.vto,(dias.get(f.vto)||0)+f.total));
+  const next=[...dias.entries()].sort().slice(0,5);
+  return `<h1>Resumen</h1><p class="sub">Datos hasta ${esc(lastMonth()?mlabel(lastMonth()):'—')}. Gasto en libros y distribuidores, cargos previstos y devoluciones.</p>
+  <div class="grid kpis">
+   <div class="kpi"><div class="l">Compras a distribuidores ${Y}</div><div class="v">${money(gasto)}</div><div class="n">Neto de abonos</div></div>
+   <div class="kpi alt"><div class="l">Abonos / devoluciones ${Y}</div><div class="v">${money(abon)}</div><div class="n"><a href="#devoluciones">Ver devoluciones</a></div></div>
+   <div class="kpi"><div class="l">Cargos próximos 30 días</div><div class="v">${money(p30)}</div><div class="n"><a href="#cargos">Ver calendario de cargos</a></div></div>
+   <div class="kpi"><div class="l">Pendiente de cargar</div><div class="v">${money(sum(prox,f=>f.total))}</div><div class="n">${sinVto?sinVto+' documento'+(sinVto>1?'s':'')+' sin fecha de vencimiento':'Todo con vencimiento'}</div></div>
+  </div>
+  <div class="card"><h2>Compras mensuales ${Y} (distribuidores)</h2>${chart('ini',ser,cats,MES3,280)}</div>
+  <div class="card"><h2>Próximos cargos</h2>${next.length?`<div class="tblwrap"><table><tbody>${next.map(([d,v])=>`<tr><td>${esc(dlabel(d))}</td><td class="r">${amt(v)}</td></tr>`).join('')}</tbody></table></div>`:'<div class="empty">No hay cargos pendientes con fecha de vencimiento.</div>'}</div>`;
+}
+
+function viewFacturas(){
+  if(!UI.facMes&&UI.facMes!=='all')UI.facMes=S.facturas.reduce((a,f)=>f.fecha.slice(0,7)>a?f.fecha.slice(0,7):a,'')||lastMonth();
+  const all=UI.facMes==='all';
+  const q=UI.facQ.trim().toLowerCase();
+  let list=S.facturas.filter(f=>(all||f.fecha.slice(0,7)===UI.facMes)&&(!UI.facProv||f.prov===UI.facProv)&&(!UI.facTipo||f.tipo===UI.facTipo)&&(!q||(f.prov+' '+f.num+' '+f.nota).toLowerCase().includes(q)));
+  list.sort((a,b)=>b.fecha.localeCompare(a.fecha)||a.prov.localeCompare(b.prov));
+  const fac=list.filter(f=>f.tipo!=='abono'),ab=list.filter(f=>f.tipo==='abono');
+  const meses=[...new Set(S.facturas.map(f=>f.fecha.slice(0,7)))].sort().reverse();
+  const rowHtml=f=>`<tr><td>${fdate(f.fecha)}</td><td>${esc(f.prov)}</td><td>${esc(f.num)}</td><td>${tagTipo(f.tipo)}</td><td class="r">${f.base==null?'<span class="mut">—</span>':amt(f.base)}</td><td class="r"><b>${amt(f.total)}</b></td><td>${fdate(f.vto)}</td><td>${tagEstado(f.estado)}</td><td class="wrap">${esc(f.nota)}</td><td><button class="link" data-act="edit" data-id="${f.id}">Editar</button><button class="link danger" data-act="del" data-id="${f.id}">Borrar</button></td></tr>`;
+  const table=list.length?`<div class="tblwrap"><table><thead><tr><th>Fecha</th><th>Proveedor</th><th>Nº</th><th>Tipo</th><th class="r">Base</th><th class="r">Total</th><th>Vencimiento</th><th>Estado</th><th>Notas</th><th></th></tr></thead><tbody>${list.map(rowHtml).join('')}</tbody><tfoot><tr><td colspan="5">${fac.length} facturas · ${ab.length} abonos</td><td class="r">${amt(sum(list,f=>f.total))}</td><td colspan="4"></td></tr></tfoot></table></div>`:'<div class="empty">No hay facturas con estos filtros. Usa «Nueva factura» para añadir una.</div>';
+  let resumen='';
+  if(!all){
+    const rows=series().filter(r=>r.m===UI.facMes&&(!UI.facProv||r.p===UI.facProv));
+    const by=new Map();rows.forEach(r=>{let e=by.get(r.p);if(!e){e={p:r.p,f:0,a:0,src:new Set()};by.set(r.p,e)}(r.t==='a'?(e.a+=r.v):(e.f+=r.v));e.src.add(r.src)});
+    const L=[...by.values()].sort((a,b)=>(b.f+b.a)-(a.f+a.a));
+    if(L.length)resumen=`<details class="dia" data-key="fac-res"${OPEN.has('fac-res')?' open':''}><summary><span class="d">Resumen del mes por proveedor</span><span class="n">${L.length} proveedores · incluye histórico</span><span class="amt">${amt(sum(L,e=>e.f+e.a))}</span></summary><div class="inner"><div class="tblwrap"><table><thead><tr><th>Proveedor</th><th class="r">Facturas</th><th class="r">Abonos</th><th class="r">Neto</th><th>Origen</th></tr></thead><tbody>${L.map(e=>`<tr><td>${esc(e.p)}</td><td class="r">${amt(e.f)}</td><td class="r">${amt(e.a)}</td><td class="r"><b>${amt(e.f+e.a)}</b></td><td>${[...e.src].map(s=>s==='reg'?'<span class="tag ok">Facturas registradas</span>':'<span class="tag">Histórico (hoja)</span>').join(' ')}</td></tr>`).join('')}</tbody></table></div><p class="foot">Para cada proveedor y mes se usan las facturas registradas aquí; si no hay ninguna, se usa el resumen mensual de la hoja de contabilidad.</p></div></details>`;
+  }
+  return `<h1>Facturas y abonos</h1><p class="sub">Registro mensual de facturas recibidas y abonos. Los abonos se guardan con importe negativo.</p>
+  <div class="bar">
+   <label>Mes<select data-ui="facMes">${opt('all','Todos los meses',UI.facMes)}${meses.map(m=>opt(m,mlabel(m),UI.facMes)).join('')}</select></label>
+   <label>Proveedor<select data-ui="facProv">${opt('','Todos',UI.facProv)}${provList().map(p=>opt(p,p,UI.facProv)).join('')}</select></label>
+   <label>Tipo<select data-ui="facTipo">${opt('','Todos',UI.facTipo)}${opt('factura','Facturas',UI.facTipo)}${opt('abono','Abonos',UI.facTipo)}</select></label>
+   <label>Buscar<input type="search" id="q" data-ui="facQ" value="${esc(UI.facQ)}" placeholder="Nº, proveedor, nota…"></label>
+   <span class="sp"></span><button class="primary" data-act="new">+ Nueva factura</button>
+  </div>
+  <div class="grid kpis"><div class="kpi"><div class="l">Facturas</div><div class="v">${money(sum(fac,f=>f.total))}</div><div class="n">${fac.length} documentos</div></div>
+   <div class="kpi alt"><div class="l">Abonos</div><div class="v">${money(sum(ab,f=>f.total))}</div><div class="n">${ab.length} documentos</div></div>
+   <div class="kpi"><div class="l">Neto</div><div class="v">${money(sum(list,f=>f.total))}</div><div class="n">Facturas − abonos</div></div></div>
+  ${table}<div style="height:14px"></div>${resumen}`;
+}
+
+function gastoRows(){
+  const rows=series().filter(r=>(UI.gGrupo==='all'||grupoDe(r.p)===UI.gGrupo)&&(!UI.gProv||r.p===UI.gProv));
+  if(UI.gImporte==='bruto')return rows.filter(r=>r.t==='f');
+  return rows;
+}
+function viewGastos(){
+  const Y=UI.gAnio||defaultYear(),rows=gastoRows(),years=allYears(),mensual=UI.gModo==='mensual';
+  let body,titulo;
+  if(mensual){
+    const cats=MESES.map((_,i)=>Y+'-'+String(i+1).padStart(2,'0'));const yr=rows.filter(r=>r.m.startsWith(Y));
+    titulo=`Gasto mensual ${Y}`;
+    body=`<div class="card"><h2>${titulo}</h2>${chart('g1',buildSeries(yr,cats,r=>r.m,8),cats,MES3,320)}</div><div class="card"><h2>Detalle por proveedor</h2>${pivotTable(yr,cats,r=>r.m,MES3,{onProv:true})}</div>`;
+  }else{
+    const last=lastMonth().slice(0,4);const labels=years.map(y=>y===last&&lastMonth()<last+'-12'?y+'*':y);
+    titulo='Gasto anual';
+    body=`<div class="card"><h2>${titulo}</h2>${chart('g2',buildSeries(rows,years,r=>r.m.slice(0,4),8),years,labels,320)}<p class="foot">* Año en curso: incluye datos hasta ${esc(mlabel(lastMonth()))}.</p></div><div class="card"><h2>Detalle por proveedor</h2>${pivotTable(rows,years,r=>r.m.slice(0,4),labels,{onProv:true})}</div>`;
+  }
+  return `<h1>Gastos por distribuidor</h1><p class="sub">Evolución de las compras mensuales y anuales. Pulsa un proveedor de la tabla para aislarlo.</p>
+  <div class="bar">
+   <div class="seg" role="group" aria-label="Periodo"><button data-ui="gModo" data-v="mensual" class="${mensual?'on':''}">Mensual</button><button data-ui="gModo" data-v="anual" class="${mensual?'':'on'}">Anual</button></div>
+   ${mensual?`<label>Año<select data-ui="gAnio">${years.map(y=>opt(y,y,Y)).join('')}</select></label>`:''}
+   <label>Mostrar<select data-ui="gGrupo">${opt('dist','Distribuidores y editoriales',UI.gGrupo)}${opt('gen','Gastos generales',UI.gGrupo)}${opt('all','Todo',UI.gGrupo)}</select></label>
+   <label>Importe<select data-ui="gImporte">${opt('neto','Neto (facturas − abonos)',UI.gImporte)}${opt('bruto','Solo facturas',UI.gImporte)}</select></label>
+   <label>Proveedor<select data-ui="gProv">${opt('','Todos',UI.gProv)}${provList().map(p=>opt(p,p,UI.gProv)).join('')}</select></label>
+  </div>${body}`;
+}
+
+function viewCargos(){
+  const t=todayISO(),m=UI.cMode;
+  const base=S.facturas.filter(f=>f.vto);
+  let list=m==='prox'?base.filter(f=>f.estado!=='cargada'&&f.vto>=t):m==='pend'?base.filter(f=>f.estado!=='cargada'):base;
+  list=[...list].sort((a,b)=>a.vto.localeCompare(b.vto)||a.prov.localeCompare(b.prov)||a.fecha.localeCompare(b.fecha));
+  const vencidas=base.filter(f=>f.vto<t&&f.estado!=='cargada');
+  const sinVto=S.facturas.filter(f=>!f.vto&&f.estado!=='cargada');
+  const meses=[...new Set(list.map(f=>f.vto.slice(0,7)))];
+  const ser=buildSeries(list.map(f=>({p:f.prov,m:f.vto.slice(0,7),v:f.total})),meses,r=>r.m,6);
+  const invRow=f=>`<tr><td>${esc(f.num)}</td><td>${fdate(f.fecha)}</td><td>${tagTipo(f.tipo)}</td><td class="r">${amt(f.total)}</td><td>${tagEstado(f.estado)}</td><td class="wrap">${esc(f.nota)}</td><td><button class="link" data-act="toggle" data-id="${f.id}">${f.estado==='cargada'?'Marcar pendiente':'Marcar cargada'}</button></td></tr>`;
+  let html='';
+  for(const mes of meses){
+    const lm=list.filter(f=>f.vto.slice(0,7)===mes);
+    html+=`<section class="mes"><h3><span>${esc(mlabel(mes))}</span><span>${money(sum(lm,f=>f.total))}</span></h3>`;
+    const dias=[...new Set(lm.map(f=>f.vto))];
+    for(const d of dias){
+      const ld=lm.filter(f=>f.vto===d),provs=[...new Set(ld.map(f=>f.prov))];
+      const pendD=ld.some(f=>f.estado!=='cargada');
+      html+=`<details class="dia" data-key="d-${d}"${OPEN.has('d-'+d)?' open':''}><summary><span class="d">${esc(dlabel(d))}</span><span class="n">${ld.length} documento${ld.length>1?'s':''} · ${provs.length} proveedor${provs.length>1?'es':''}</span><span class="amt">${amt(sum(ld,f=>f.total))}</span></summary><div class="inner">`;
+      const pl=provs.map(p=>({p,l:ld.filter(f=>f.prov===p)})).sort((a,b)=>sum(b.l,f=>f.total)-sum(a.l,f=>f.total));
+      for(const e of pl){
+        html+=`<details class="prov" data-key="p-${d}-${esc(e.p)}"${OPEN.has('p-'+d+'-'+e.p)?' open':''}><summary><span class="d">${esc(e.p)}</span><span class="n">${e.l.length} documento${e.l.length>1?'s':''}</span><span class="amt">${amt(sum(e.l,f=>f.total))}</span></summary><div class="inner"><div class="tblwrap"><table><thead><tr><th>Nº</th><th>Fecha</th><th>Tipo</th><th class="r">Importe</th><th>Estado</th><th>Notas</th><th></th></tr></thead><tbody>${e.l.map(invRow).join('')}</tbody></table></div></div></details>`;
+      }
+      html+=`<div style="margin-top:10px">${pendD?`<button data-act="mark-day" data-d="${d}">Marcar día como cargado</button>`:''}</div></div></details>`;
+    }
+    html+='</section>';
+  }
+  if(!list.length)html='<div class="card empty">No hay cargos con vencimiento en esta vista.</div>';
+  const sv=sinVto.length?`<div class="card"><h2>Sin fecha de vencimiento (${sinVto.length})</h2><div class="tblwrap"><table><thead><tr><th>Fecha</th><th>Proveedor</th><th>Nº</th><th>Tipo</th><th class="r">Importe</th><th>Pago</th><th>Notas</th><th></th></tr></thead><tbody>${sinVto.map(f=>`<tr><td>${fdate(f.fecha)}</td><td>${esc(f.prov)}</td><td>${esc(f.num)}</td><td>${tagTipo(f.tipo)}</td><td class="r">${amt(f.total)}</td><td>${esc(f.pago)}</td><td class="wrap">${esc(f.nota)}</td><td><button class="link" data-act="edit" data-id="${f.id}">Añadir vencimiento</button></td></tr>`).join('')}</tbody></table></div></div>`:'';
+  return `<h1>Cargos previstos</h1><p class="sub">Cargos agrupados por fecha de vencimiento. Abre cada día para ver el reparto por distribuidor y, dentro, las facturas. Los abonos con el mismo vencimiento se restan del cargo.</p>
+  <div class="bar"><div class="seg" role="group" aria-label="Vista"><button data-ui="cMode" data-v="prox" class="${m==='prox'?'on':''}">Próximos</button><button data-ui="cMode" data-v="pend" class="${m==='pend'?'on':''}">Todos los pendientes</button><button data-ui="cMode" data-v="todos" class="${m==='todos'?'on':''}">Incluir cargados</button></div>
+   <span class="sp"></span><button data-act="expand">Desplegar todo</button><button data-act="collapse">Plegar todo</button></div>
+  ${vencidas.length&&m==='prox'?`<div class="notice">${vencidas.length} documento${vencidas.length>1?'s':''} con vencimiento pasado sin marcar como cargado${vencidas.length>1?'s':''}. <button class="link" data-ui="cMode" data-v="pend">Revisar</button></div>`:''}
+  ${list.length?`<div class="card"><h2>Total por mes de vencimiento</h2>${chart('c1',ser,meses,meses.map(x=>MES3[+x.slice(5,7)-1]+' '+x.slice(2,4)),240)}</div>`:''}
+  ${html}${sv}`;
+}
+
+function viewDev(){
+  const years=allYears(),Y=UI.dAnio||defaultYear(),rowsAll=series();
+  const ab=rowsAll.filter(r=>r.t==='a'&&(!UI.dProv||r.p===UI.dProv)).map(r=>({...r,v:-r.v}));
+  const yr=ab.filter(r=>r.m.startsWith(Y));
+  const cats=MESES.map((_,i)=>Y+'-'+String(i+1).padStart(2,'0'));
+  const totY=sum(yr,r=>r.v);
+  const byP=new Map();yr.forEach(r=>byP.set(r.p,(byP.get(r.p)||0)+r.v));
+  const topP=[...byP.entries()].sort((a,b)=>b[1]-a[1])[0];
+  const compras=p=>sum(rowsAll.filter(r=>r.t==='f'&&r.p===p&&r.m.startsWith(Y)),r=>r.v);
+  const docs=S.facturas.filter(f=>f.tipo==='abono'&&(!UI.dProv||f.prov===UI.dProv)).sort((a,b)=>b.fecha.localeCompare(a.fecha));
+  const last=lastMonth().slice(0,4);const labels=years.map(y=>y===last&&lastMonth()<last+'-12'?y+'*':y);
+  const ratio=[...byP.entries()].sort((a,b)=>b[1]-a[1]).map(([p,v])=>{const c=compras(p);return `<tr><td>${esc(p)}</td><td class="r">${money(v)}</td><td class="r">${money(c)}</td><td class="r">${c>0?(v/c*100).toLocaleString('es-ES',{maximumFractionDigits:1})+' %':'<span class="mut">—</span>'}</td></tr>`}).join('');
+  return `<h1>Devoluciones</h1><p class="sub">Solo facturas de abono. Los importes se muestran en positivo (dinero que te devuelven o descuentan).</p>
+  <div class="bar"><label>Año<select data-ui="dAnio">${years.map(y=>opt(y,y,Y)).join('')}</select></label>
+   <label>Proveedor<select data-ui="dProv">${opt('','Todos',UI.dProv)}${provList().filter(p=>rowsAll.some(r=>r.t==='a'&&r.p===p)).map(p=>opt(p,p,UI.dProv)).join('')}</select></label></div>
+  <div class="grid kpis"><div class="kpi"><div class="l">Abonos ${Y}</div><div class="v">${money(totY)}</div><div class="n">${byP.size} proveedor${byP.size===1?'':'es'}</div></div>
+   <div class="kpi alt"><div class="l">Mayor proveedor</div><div class="v">${topP?esc(topP[0]):'—'}</div><div class="n">${topP?money(topP[1]):''}</div></div>
+   <div class="kpi"><div class="l">Abonos pendientes de cargo</div><div class="v">${money(-sum(docs.filter(f=>f.estado!=='cargada'),f=>f.total))}</div><div class="n">${docs.filter(f=>f.estado!=='cargada').length} documentos registrados</div></div></div>
+  <div class="card"><h2>Abonos mensuales ${Y}</h2>${chart('d1',buildSeries(yr,cats,r=>r.m,8),cats,MES3,260)}</div>
+  <div class="card"><h2>Abonos anuales</h2>${chart('d2',buildSeries(ab,years,r=>r.m.slice(0,4),8),years,labels,240)}<p class="foot">* Año en curso: datos hasta ${esc(mlabel(lastMonth()))}.</p></div>
+  <div class="card"><h2>Por proveedor en ${Y}</h2>${pivotTable(yr,cats,r=>r.m,MES3)}</div>
+  ${ratio?`<div class="card"><h2>Peso de los abonos sobre las compras (${Y})</h2><div class="tblwrap"><table><thead><tr><th>Proveedor</th><th class="r">Abonos</th><th class="r">Compras (facturas)</th><th class="r">% devuelto</th></tr></thead><tbody>${ratio}</tbody></table></div></div>`:''}
+  <div class="card"><h2>Documentos de abono registrados (${docs.length})</h2>${docs.length?`<div class="tblwrap"><table><thead><tr><th>Fecha</th><th>Proveedor</th><th>Nº</th><th class="r">Importe</th><th>Vencimiento</th><th>Estado</th><th>Notas</th><th></th></tr></thead><tbody>${docs.map(f=>`<tr><td>${fdate(f.fecha)}</td><td>${esc(f.prov)}</td><td>${esc(f.num)}</td><td class="r">${amt(f.total)}</td><td>${fdate(f.vto)}</td><td>${tagEstado(f.estado)}</td><td class="wrap">${esc(f.nota)}</td><td><button class="link" data-act="edit" data-id="${f.id}">Editar</button></td></tr>`).join('')}</tbody></table></div>`:'<div class="empty">Aún no hay abonos registrados individualmente. Los meses anteriores salen del resumen histórico.</div>'}</div>`;
+}
+
+function viewAbout(){
+  return `<h1>Cómo funciona esta app</h1><p class="sub">Una nota rápida sobre de dónde salen los datos y cómo mantenerlos al día.</p>
+  <div class="card about">
+  <p><b>Dos formas de usarla.</b> Si la abres desde el enlace web, los cambios se guardan en la nube y se ven desde cualquier dispositivo donde la abras. Si trabajas con el archivo descargado en tu móvil u ordenador, los cambios se guardan solo en ese navegador.</p>
+  <p><b>Actualizar la hoja de Excel.</b> En «Datos → Actualizar hoja Excel» puedes volver a subir tu hoja de contabilidad (mismo formato: una pestaña por año, proveedores en filas, meses en columnas) cada vez que la ajustes. Sustituye el histórico de ese año sin tocar las facturas sueltas que hayas registrado.</p>
+  <p><b>Cargar facturas nuevas.</b> Puedes añadirlas a mano con «Nueva factura», o importar varias a la vez desde un CSV (columnas: fecha, proveedor, número, tipo, base, total, vencimiento, pago, estado, notas) en «Datos → Importar facturas».</p>
+  <p><b>Lectura automática de PDF.</b> Esta app no lee PDF de facturas por sí sola. Pídemelo en la conversación de Claude cuando quieras que revise las facturas nuevas de Drive y actualice los datos.</p>
+  </div>`;
+}
+
+/* ---------- render ---------- */
+const TABS=[['inicio','Resumen'],['facturas','Facturas'],['gastos','Gastos'],['cargos','Cargos previstos'],['devoluciones','Devoluciones']];
+function render(){
+  CH={};
+  document.getElementById('tabs').innerHTML=TABS.map(([k,l])=>`<a href="#${k}" class="${UI.tab===k?'on':''}">${l}</a>`).join('');
+  const v={inicio:viewInicio,facturas:viewFacturas,gastos:viewGastos,cargos:viewCargos,devoluciones:viewDev,about:viewAbout}[UI.tab]||viewInicio;
+  document.getElementById('view').innerHTML=v();
+}
+function route(){const h=location.hash.replace('#','');UI.tab=(TABS.some(t=>t[0]===h)||h==='about')?h:'inicio';saveUI();render();window.scrollTo(0,0)}
+addEventListener('hashchange',route);
+
+/* ---------- formulario ---------- */
+function openForm(id){
+  const f=id?S.facturas.find(x=>x.id===id):{id:'',fecha:todayISO(),prov:'',num:'',tipo:'factura',base:null,total:'',vto:'',pago:'Domiciliación',estado:'pendiente',nota:''};
+  const shown=v=>v==null||v===''?'':String(Math.abs(v)).replace('.',',');
+  const d=document.getElementById('dlg');
+  d.innerHTML=`<form method="dialog" id="frm"><h2>${id?'Editar':'Nueva'} factura o abono</h2>
+  <div class="fgrid">
+   <label>Fecha de factura<input type="date" name="fecha" required value="${esc(f.fecha)}"></label>
+   <label>Tipo<select name="tipo">${opt('factura','Factura',f.tipo)}${opt('abono','Abono (devolución)',f.tipo)}</select></label>
+   <label>Proveedor<input type="text" name="prov" required list="provs" value="${esc(f.prov)}" autocomplete="off"><datalist id="provs">${provList().map(p=>`<option value="${esc(p)}">`).join('')}</datalist></label>
+   <label>Nº de factura<input type="text" name="num" value="${esc(f.num)}"></label>
+   <label>Base imponible (€)<input type="text" inputmode="decimal" name="base" value="${shown(f.base)}" placeholder="opcional"></label>
+   <label>Total con IVA (€)<input type="text" inputmode="decimal" name="total" required value="${shown(f.total)}" placeholder="0,00"></label>
+   <label>Fecha de vencimiento<input type="date" name="vto" value="${esc(f.vto)}"></label>
+   <label>Forma de pago<select name="pago">${['Domiciliación','Transferencia','Tarjeta','Otro'].map(p=>opt(p,p,f.pago)).join('')}</select></label>
+   <label>Estado<select name="estado">${opt('pendiente','Pendiente de cargo',f.estado)}${opt('cargada','Cargada / pagada',f.estado)}</select></label>
+   <label class="full">Notas<textarea name="nota" rows="2">${esc(f.nota)}</textarea></label>
+  </div><p class="foot">En los abonos escribe el importe en positivo: la app lo guarda como negativo.</p>
+  <div class="actions"><button type="button" data-act="close">Cancelar</button><button class="primary" value="ok" data-id="${esc(id||'')}">Guardar</button></div></form>`;
+  d.showModal();
+}
+document.addEventListener('submit',async e=>{
+  if(e.target.id!=='frm')return;e.preventDefault();
+  const fd=new FormData(e.target),id=e.submitter&&e.submitter.dataset.id;
+  const tipo=fd.get('tipo'),tot=parseNum(fd.get('total')),base=parseNum(fd.get('base'));
+  if(isNaN(tot)){alert('Introduce un importe total válido.');return}
+  const sign=tipo==='abono'?-1:1;
+  const rec={fecha:fd.get('fecha'),prov:String(fd.get('prov')).trim(),num:String(fd.get('num')).trim(),tipo,base:isNaN(base)?null:r2(Math.abs(base)*sign),total:r2(Math.abs(tot)*sign),vto:fd.get('vto')||'',pago:fd.get('pago'),estado:fd.get('estado'),nota:String(fd.get('nota')).trim()};
+  const btn=e.submitter;btn.disabled=true;btn.textContent='Guardando…';
+  try{ if(id){await Store.setFactura(id,rec)}else{await Store.addFactura(rec)} }
+  catch(err){alert('No se pudo guardar: '+(err&&err.message||err));btn.disabled=false;btn.textContent='Guardar';return}
+  if(!UI.facMes||UI.facMes!=='all')UI.facMes=rec.fecha.slice(0,7);
+  saveUI();document.getElementById('dlg').close();render();
+});
+
+/* ---------- importar CSV / JSON de facturas ---------- */
+const csvCell=v=>{v=String(v==null?'':v);return /[;"\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};
+const numEs=n=>n==null?'':String(n).replace('.',',');
+function exportCSV(){const head=['fecha','proveedor','numero','tipo','base','total','vencimiento','pago','estado','notas'];
+  const rows=S.facturas.slice().sort((a,b)=>a.fecha.localeCompare(b.fecha)).map(f=>[f.fecha,f.prov,f.num,f.tipo,numEs(f.base),numEs(f.total),f.vto,f.pago,f.estado,f.nota].map(csvCell).join(';'));
+  offerDownload('facturas-bangarang.csv','﻿'+head.join(';')+'\n'+rows.join('\n'),'text/csv;charset=utf-8')}
+function parseCSV(text){const delim=(text.split('\n')[0].match(/;/g)||[]).length>=(text.split('\n')[0].match(/,/g)||[]).length?';':',';const rows=[];let row=[],cell='',q=false;
+  for(let i=0;i<text.length;i++){const c=text[i];if(q){if(c==='"'){if(text[i+1]==='"'){cell+='"';i++}else q=false}else cell+=c}else if(c==='"')q=true;else if(c===delim){row.push(cell);cell=''}else if(c==='\n'||c==='\r'){if(c==='\r'&&text[i+1]==='\n')i++;row.push(cell);cell='';if(row.some(x=>x!==''))rows.push(row);row=[]}else cell+=c}
+  row.push(cell);if(row.some(x=>x!==''))rows.push(row);return rows}
+async function importText(name,text){
+  text=text.replace(/^﻿/,'');let recs=[];
+  if(name.toLowerCase().endsWith('.json')){const j=JSON.parse(text);recs=Array.isArray(j)?j:(j.facturas||[])}
+  else{const rows=parseCSV(text);const h=rows.shift().map(x=>x.trim().toLowerCase());const ix=k=>h.findIndex(x=>x.startsWith(k));
+    for(const r of rows){const g=k=>{const i=ix(k);return i<0?'':(r[i]||'').trim()};const tot=parseNum(g('total'));if(isNaN(tot))continue;
+      const tipo=/abon/i.test(g('tipo'))||tot<0?'abono':'factura';const s=tipo==='abono'?-1:1;const b=parseNum(g('base'));
+      recs.push({fecha:parseDate(g('fecha')),prov:g('prov'),num:g('num'),tipo,base:isNaN(b)?null:r2(Math.abs(b)*s),total:r2(Math.abs(tot)*s),vto:parseDate(g('venc')),pago:g('pago')||'Domiciliación',estado:/carg|pag/i.test(g('estado'))?'cargada':'pendiente',nota:g('nota')})}}
+  const ok=recs.filter(r=>r.fecha&&r.prov&&typeof r.total==='number');
+  const n=await Store.importFacturas(ok);
+  alert(n+' documentos importados'+(ok.length-n?' ('+(ok.length-n)+' ya existían).':'.'));
+}
+document.getElementById('fileCsv').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{importText(f.name,String(r.result)).catch(err=>alert('No se pudo importar: '+err.message))};r.readAsText(f);e.target.value=''});
+
+/* ---------- importar hoja Excel (histórico) ---------- */
+const MESRX=/^(Enero|Febrero|Marzo|Abril|Mayo|Junio|Julio|Agosto|Sept\w+|Octubre|Noviembre|Diciembre)$/i;
+const MNUM={enero:1,febrero:2,marzo:3,abril:4,mayo:5,junio:6,julio:7,agosto:8,octubre:10,noviembre:11,diciembre:12};
+function parseCell(v){
+  if(v==null||v==='')return null;
+  if(typeof v==='number')return r2(v);
+  let s=String(v).replace(/[€\s]/g,'').replace(/\\/g,'');
+  if(s==='')return null;
+  if(s.includes(','))s=s.replace(/\./g,'').replace(',','.');
+  const n=Number(s);return isNaN(n)?null:r2(n);
+}
+function parseWorkbookHistorico(wb){
+  const skip=new Set(['Total','Facturado','Emitidas','Beneficio','Facturación','Facturac.','IRPF','IVA','Impuestos']);
+  const byYear={};
+  for(const name of wb.SheetNames){
+    if(!/^(19|20)\d{2}$/.test(name.trim()))continue;
+    const year=name.trim();
+    const rows=XLSX.utils.sheet_to_json(wb.Sheets[name],{header:1,raw:true,defval:''});
+    let hdrIdx=-1,mcols={};
+    for(let i=0;i<rows.length;i++){
+      const cells=rows[i];let found=false;
+      for(let c=0;c<cells.length;c++){if(String(cells[c]).trim().toLowerCase()==='enero'){found=true;break}}
+      if(found){hdrIdx=i;cells.forEach((c,ci)=>{const t=String(c).trim();if(MESRX.test(t))mcols[ci]=t});break}
+    }
+    if(hdrIdx<0)continue;
+    const out=[];
+    for(let i=hdrIdx+1;i<rows.length;i++){
+      const cells=rows[i];const rawName=String(cells[0]!==undefined&&cells[0]!==''?cells[0]:cells[1]||'').trim();
+      if(!rawName)continue;
+      if(rawName==='Total')break;
+      if(skip.has(rawName))continue;
+      let name=rawName,tipo='f';
+      if(/\s+abono$/i.test(name)){tipo='a';name=name.replace(/\s+abono$/i,'').trim()}
+      for(const ci in mcols){
+        const v=parseCell(cells[ci]);if(v===null||v===0)continue;
+        const mn=mcols[ci];const key=mn.toLowerCase().slice(0,4)==='sept'?9:MNUM[mn.toLowerCase()];
+        if(!key)continue;
+        out.push({p:name,t:tipo,m:year+'-'+String(key).padStart(2,'0'),v});
+      }
+    }
+    if(out.length)byYear[year]=out;
+  }
+  return byYear;
+}
+document.getElementById('fileXlsx').addEventListener('change',e=>{
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=async()=>{
+    try{
+      const wb=XLSX.read(r.result,{type:'array'});
+      const byYear=parseWorkbookHistorico(wb);
+      const years=Object.keys(byYear);
+      if(!years.length){alert('No he encontrado pestañas con el formato esperado (una por año, con "Enero" en la cabecera).');return}
+      const n=await Store.importHistorico(byYear);
+      alert('Histórico actualizado: '+n+' año(s) — '+years.join(', ')+'.');
+    }catch(err){alert('No se pudo leer el Excel: '+(err&&err.message||err))}
+  };
+  r.readAsArrayBuffer(f);e.target.value='';
+});
+
+/* ---------- eventos ---------- */
+document.addEventListener('click',e=>{
+  const ui=e.target.closest('[data-ui][data-v]');if(ui){UI[ui.dataset.ui]=ui.dataset.v;saveUI();render();return}
+  const b=e.target.closest('[data-act]');if(!b)return;const a=b.dataset.act,id=b.dataset.id;
+  const menu=b.closest('.menu');if(menu)menu.open=false;
+  if(a==='new')openForm();
+  else if(a==='edit')openForm(id);
+  else if(a==='close')document.getElementById('dlg').close();
+  else if(a==='del'){const f=S.facturas.find(x=>x.id===id);if(f&&confirm('¿Borrar '+f.prov+' '+f.num+'?'))Store.deleteFactura(id).catch(err=>alert('No se pudo borrar: '+err.message))}
+  else if(a==='toggle')Store.toggleEstado(id).catch(err=>alert('No se pudo actualizar: '+err.message));
+  else if(a==='mark-day')Store.markDay(b.dataset.d).catch(err=>alert('No se pudo actualizar: '+err.message));
+  else if(a==='expand'||a==='collapse'){document.querySelectorAll('#view details[data-key]').forEach(d=>{d.open=a==='expand'})}
+  else if(a==='prov'){UI.gProv=b.dataset.p;saveUI();render()}
+  else if(a==='export-csv')exportCSV();
+  else if(a==='export-json')offerDownload('contabilidad-bangarang-copia.json',JSON.stringify({version:2,fecha:todayISO(),facturas:S.facturas},null,1),'application/json');
+  else if(a==='import-csv')document.getElementById('fileCsv').click();
+  else if(a==='import-xlsx')document.getElementById('fileXlsx').click();
+  else if(a==='about'){location.hash='#about'}
+  else if(a==='reset'){if(confirm('Se perderán las facturas registradas a mano y se recargarán los datos iniciales. ¿Continuar?'))Store.reset().catch(err=>alert('No se pudo restablecer: '+err.message))}
+});
+function onControl(e){
+  const el=e.target.closest('[data-ui]');if(!el||el.dataset.v!==undefined)return;
+  UI[el.dataset.ui]=el.value;saveUI();render();
+  if(el.type==='search'){const n=document.getElementById('q');if(n){n.focus();n.setSelectionRange(n.value.length,n.value.length)}}
+}
+document.addEventListener('change',onControl);
+document.addEventListener('input',e=>{if(e.target.type==='search')onControl(e)});
+document.addEventListener('toggle',e=>{const d=e.target;if(d.dataset&&d.dataset.key){d.open?OPEN.add(d.dataset.key):OPEN.delete(d.dataset.key)}},true);
+
+route();
+Store.init();
+</script>
