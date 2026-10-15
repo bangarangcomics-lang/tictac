@@ -1023,5 +1023,8 @@ document.addEventListener('visibilitychange', () => {
   else if (UI.mode === 'home') sb.rpc('tt_public_info').then(({ data }) => { if (data) { S.pub = data; scheduleRender(); } });
 });
 
+// iPhone: bloquear el zoom con dos dedos (el doble toque lo bloquea touch-action en styles.css)
+['gesturestart', 'gesturechange', 'gestureend'].forEach(ev => document.addEventListener(ev, e => e.preventDefault(), { passive: false }));
+
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(() => {});
 boot();

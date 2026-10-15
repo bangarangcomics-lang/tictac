@@ -27,6 +27,18 @@
 html,body{min-height:100%}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5;padding-inline:max(16px, env(safe-area-inset-left, 0px));padding-block:env(safe-area-inset-top, 0px) calc(48px + env(safe-area-inset-bottom, 0px));-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
 [hidden]{display:none!important}
+/* Móvil: la página nunca se desplaza en horizontal (las tablas tienen su propio scroll) */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+html,body{max-width:100%;overflow-x:hidden}
+/* Sin zoom por doble toque (p. ej. al pulsar rápido el teclado del PIN) */
+html,body,button,a,input,label,.pad{touch-action:manipulation}
+.pad,.pad button,.pin-dots,.punch{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+/* iPhone: campos de 16px o más para que Safari no haga zoom al tocarlos */
+input,select,textarea,.input{font-size:16px}
+/* iPhone: los campos de fecha y hora no deben imponer su propio ancho mínimo */
+input[type=date],input[type=time],input[type=month]{-webkit-appearance:none;appearance:none;min-width:0;max-width:100%;min-height:44px;display:block}
+input[type=date]::-webkit-date-and-time-value,input[type=time]::-webkit-date-and-time-value{text-align:left}
+.field,.grid2>*{min-width:0}
 .wrap{max-width:1080px;margin:0 auto}
 h1,h2,h3{font-family:var(--display);font-weight:650;letter-spacing:-.01em;text-wrap:balance;margin:0}
 h1{font-size:clamp(28px,5vw,38px);line-height:1.1}
@@ -50,7 +62,7 @@ button{cursor:pointer}
 .btn[disabled]{opacity:.5;cursor:not-allowed}
 .field{display:grid;gap:6px}
 .field label,.lbl{font-size:13px;font-weight:600;color:var(--ink-2)}
-.input{width:100%;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:10px 12px;font-size:15px}
+.input{width:100%;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:10px 12px;font-size:16px}
 .input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
 textarea.input{min-height:84px;resize:vertical}
 .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
