@@ -248,6 +248,21 @@ function weekWorked(empId, ref = new Date()) {
   return entriesOf(empId).filter(e => { const d = new Date(e.in); return d >= ws && d < we; }).reduce((a, e) => a + workedMin(e), 0);
 }
 
+// Total semanal que ve el empleado: mismo criterio que el saldo del informe. La jornada en curso cuenta tal cual.
+function weekCounted(empId, emp, ref = new Date()) {
+  const ws = weekStart(ref), we = new Date(ws); we.setDate(we.getDate() + 7);
+  const byDay = {};
+  entriesOf(empId).filter(e => { const d = new Date(e.in); return d >= ws && d < we; }).forEach(e => { const d = ymd(new Date(e.in)); (byDay[d] = byDay[d] || []).push(e); });
+  const rank = d => (workdays(emp).includes(parseYmd(d).getDay()) ? 0 : 1);
+  const jm = jornadaMin(emp), req = jornadas(emp);
+  return Object.keys(byDay).sort((a, b) => rank(a) - rank(b) || a.localeCompare(b)).reduce((sum, d, i) => {
+    const worked = byDay[d].reduce((a, e) => a + workedMin(e), 0);
+    if (byDay[d].some(e => !e.out)) return sum + worked;
+    const exp = Math.round(Math.max(0, Math.min(1, req - i)) * jm);
+    return sum + (Math.abs(Math.floor(worked + 1e-6) - exp) > TOL ? worked : exp);
+  }, 0);
+}
+
 /* ---------- festivos nacionales (España) ---------- */
 function easter(y) { const a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451),mo=Math.floor((h+l-7*m+114)/31),da=((h+l-7*m+114)%31)+1; return new Date(y,mo-1,da); }
 function nationalHolidays(y) {
@@ -1018,7 +1033,7 @@ function tick() {
   const s = UI.mode === 'emp' ? { id: UI.empId } : null;
   if (s && S.employees[s.id]) {
     const e = S.employees[s.id], o = openEntry(s.id), today = ymd(now);
-    const tw = dayWorked(s.id, today), exp = jornadaMin(e), ww = weekWorked(s.id), wk = weeklyHours(e) * 60;
+    const tw = dayWorked(s.id, today), exp = jornadaMin(e), ww = weekCounted(s.id, e), wk = weeklyHours(e) * 60;
     const set = (k, v) => { const el = $(`[data-live="${k}"]`); if (el) el.textContent = v; };
     if (o) { const m = workedMin(o); set('session', `${Math.floor(m / 60)} h ${pad(Math.floor(m % 60))} min ${pad(Math.floor((m * 60) % 60))} s`); }
     set('today', fmtHM(tw)); set('week', fmtHM(ww));
