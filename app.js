@@ -16,6 +16,7 @@ const dayLabel = s => { const d = parseYmd(s); return `${DOW[d.getDay()]}, ${pad
 const dayShort = s => { const d = parseYmd(s); return `${DOW[d.getDay()]} ${d.getDate()} ${MON[d.getMonth()].slice(0,3)}`; };
 const fmtMin = m => { m = Math.round(m || 0); const neg = m < 0; m = Math.abs(m); return `${neg ? '−' : ''}${Math.floor(m / 60)} h ${pad(m % 60)} min`; };
 const fmtHM = m => { m = Math.round(m || 0); return `${Math.floor(m / 60)}:${pad(m % 60)}`; };
+const fmtSigned = m => { if (!m) return '0 min'; const a = Math.abs(m), s = m < 0 ? '−' : '+'; return a < 60 ? `${s}${a} min` : `${s}${Math.floor(a / 60)} h ${pad(a % 60)} min`; };
 const fmtHours = h => (Math.round(h * 100) / 100).toString().replace('.', ',');
 const LS = {
   get(k) { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } },
@@ -321,6 +322,17 @@ function computeReport(empId, o) {
       } else if (diff < 0) w.def = -diff;
     }
     w.red = w.expected > 0 && w.worked < w.expected;
+    // Saldo semanal por jornadas: las diferencias de hasta TOL min se ignoran; las mayores cuentan íntegras, a favor o en contra.
+    // Se usan minutos completos, los mismos que muestra el Excel.
+    const rankB = d => (d.possible && !d.special ? 0 : d.possible ? 1 : 2);
+    const rankedB = [...workedDays].sort((a, b) => rankB(a) - rankB(b) || a.date.localeCompare(b.date));
+    w.balance = 0; w.balanceDetail = [];
+    rankedB.forEach((d, i) => {
+      const x = Math.floor(d.worked + 1e-6) - Math.round(Math.max(0, Math.min(1, w.reqJ - i)) * jm);
+      if (Math.abs(x) > TOL) { w.balance += x; w.balanceDetail.push(`${dayShort(d.date)}: ${fmtSigned(x)}`); }
+    });
+    const missingB = Math.round(Math.max(0, w.reqJ - rankedB.length) * jm);
+    if (missingB > TOL) { w.balance -= missingB; w.balanceDetail.push(`Jornadas sin trabajar: ${fmtSigned(-missingB)}`); }
   }
   const T = { expected: 0, worked: 0, otL: 0, otF: 0, def: 0 };
   for (const w of weeks) { T.expected += w.expected; T.worked += w.worked; T.otL += w.otL; T.otF += w.otF; T.def += w.def; }
@@ -853,6 +865,13 @@ async function exportExcel() {
       vals.forEach((v, k) => {
         const cl = row.getCell(k + 1); cl.value = v; cl.border = box; cl.font = { bold: true, color: { argb: w.red && k === 8 ? K.redInk : K.ink } };
         cl.fill = fill(w.red ? K.red : K.week); if (k >= 4 && k <= 7) { cl.numFmt = H; cl.alignment = { horizontal: 'center' }; }
+      });
+      // Resumen de horas extra de la semana (texto: Excel no muestra tiempos negativos)
+      const balRow = ws.getRow(rn++);
+      [`Horas extra de la semana`, '', '', '', fmtSigned(w.balance), '', '', '', w.balanceDetail.join(' · ')].forEach((v, k) => {
+        const cl = balRow.getCell(k + 1); cl.value = v; cl.border = box; cl.fill = fill(K.grey);
+        cl.font = { bold: k < 8, color: { argb: w.balance < 0 && k === 4 ? K.redInk : K.ink } };
+        cl.alignment = { horizontal: k === 4 ? 'center' : 'left', vertical: 'top', wrapText: k === 8 };
       });
     }
     rn++;
